@@ -1,9 +1,32 @@
 import logging
 
+import requests
+from pylons import config
+
+import ckan.lib.helpers as h
 import ckan.plugins as p
 import ckan.lib.datapreview as datapreview
 
 log = logging.getLogger(__name__)
+
+
+def is_resource_to_large(url):
+    url = h.url_for_static_or_external(url)
+    resp = requests.head(url)
+    length = int(resp.headers.get('content-length', 0))
+    if not length:
+        range = resp.headers.get('content-range')
+        if not range:
+            # unable to identify resource's size
+            return False
+        try:
+            from_, to_ = range.split().pop().split('/').pop(0).split('-')
+            length = int(to_) - int(from_)
+        except Exception:
+            return False
+    size = length / 1024 / 1024
+    max_size = int(config.get('pdf_view.max_preview_size', 1024))
+    return size > max_size
 
 
 class PdfView(p.SingletonPlugin):
@@ -18,6 +41,7 @@ class PdfView(p.SingletonPlugin):
     p.implements(p.IConfigurer, inherit=True)
     p.implements(p.IConfigurable, inherit=True)
     p.implements(p.IResourceView, inherit=True)
+    p.implements(p.ITemplateHelpers)
 
     PDF = ['pdf', 'x-pdf', 'acrobat', 'vnd.pdf']
     proxy_is_enabled = False
@@ -52,3 +76,10 @@ class PdfView(p.SingletonPlugin):
 
     def view_template(self, context, data_dict):
         return 'pdf.html'
+
+    # ITemplateHelpers
+
+    def get_helpers(self):
+        return dict(
+            is_resource_to_large=is_resource_to_large
+        )

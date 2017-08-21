@@ -29,7 +29,7 @@
 ckanext-pdfview
 ===============
 
-This extension provides a view plugin for PDF files using `PDF.js <https://mozilla.github.io/pdf.js/>`_. 
+This extension provides a view plugin for PDF files using `PDF.js <https://mozilla.github.io/pdf.js/>`_.
 
 Beyond viewing PDFs, this version takes advantage of the latest PDF.js features that were not available in the bundled pre 2.3 viewer, namely:
 
@@ -71,9 +71,13 @@ To install ckanext-pdfview:
 4. If you want to render PDF files which are not located in the same server as
    CKAN you also need to enable the ``resource_proxy`` plugin.
 
-4. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu::
+5. If you want to disable previewing of large files add config directive::
+     pdf_view.max_preview_size = {size in MB, e.g. 100, 1024}
+
+6. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu::
 
      sudo service apache2 reload
+
 
 
 ------------------------
@@ -170,4 +174,3 @@ Also, be sure be sure to register any new or updated plugins::
        . /usr/lib/ckan/default/bin/activate
        cd /usr/lib/ckan/default/src/ckan
        python setup.py develop
-       
