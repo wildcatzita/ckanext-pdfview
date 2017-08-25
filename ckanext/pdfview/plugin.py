@@ -12,7 +12,11 @@ log = logging.getLogger(__name__)
 
 def is_resource_to_large(url):
     url = h.url_for_static_or_external(url)
-    resp = requests.head(url)
+    try:
+        resp = requests.head(url)
+    except requests.exceptions.RequestException as e:
+        print e
+        return False
     length = int(resp.headers.get('content-length', 0))
     if not length:
         range = resp.headers.get('content-range')
